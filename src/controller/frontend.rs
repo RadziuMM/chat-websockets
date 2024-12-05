@@ -1,3 +1,4 @@
+use askama::Template;
 use tokio::io::AsyncWriteExt;
 use crate::entity::request_data::RequestData;
 use crate::utils::http_helper;
@@ -12,17 +13,36 @@ pub async fn frontend_controller(data: RequestData) -> std::io::Result<()> {
     }
 }
 
+#[derive(Template)]
+#[template(path = "index.html")]
+struct IndexTemplate {
+    title: String,
+    heading: String,
+    content: String,
+}
+
 async fn get_index(data: RequestData) -> std::io::Result<()> {
-    let response_body = "Hello World!";
+    let template = IndexTemplate {
+        title: "Hello world!".to_string(),
+        heading: "Hello world!".to_string(),
+        content: "ąężźć.".to_string(),
+    };
+
+    let response_body = template
+        .render()
+        .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "Render error"))?;
 
     let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\n\r\n{}",
         response_body.len(),
         response_body
     );
 
     let mut stream = data.stream;
-    stream.write_all(response.as_bytes()).await.expect("Error occurred on closing request");
-    stream.flush().await.expect("Error occurred on closing request");
+    stream
+        .write_all(response.as_bytes())
+        .await
+        .expect("Error occurred on sending response");
+    stream.flush().await.expect("Error occurred on flushing stream");
     Ok(())
 }

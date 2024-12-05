@@ -1,9 +1,11 @@
-use tokio::io::AsyncReadExt;
+use tokio::fs::File;
+use std::path::Path;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{accept_async, WebSocketStream};
 use crate::entity::request_data::RequestData;
 use crate::utils::http_helper;
-use crate::utils::http_helper::close_ws_with_error;
+use crate::utils::http_helper::{close_ws_with_error, serve_static};
 use crate::utils::utils::extract_path_from_request;
 use crate::controller::frontend::{frontend_controller, PREFIX as FRONTEND_CONTROLLER_PREFIX};
 
@@ -54,11 +56,11 @@ async fn route_request(mut stream: TcpStream) -> std::io::Result<()> {
 
 async fn routing(data: RequestData) -> Result<(), std::io::Error> {
     match &data.path {
+        p if p.starts_with("/static/") => serve_static(data).await,
         p if p.starts_with(FRONTEND_CONTROLLER_PREFIX) => frontend_controller(data).await,
         _ => http_helper::not_found(data.stream).await
     }
 }
-
 
 async fn routing_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>) -> Result<(), std::io::Error> {
     match path {
