@@ -9,22 +9,22 @@ use tokio::fs::File;
 use tokio::io;
 use crate::entity::request_data::RequestData;
 
-pub async fn not_found(stream: TcpStream) -> std::io::Result<()> {
+pub async fn not_found(stream: TcpStream) -> io::Result<()> {
     let response = "HTTP/1.1 404 NOT_FOUND\r\nContent-Length: 0\r\n\r\n";
     finish_request(stream, response).await
 }
 
-pub async fn invalid(stream: TcpStream) -> std::io::Result<()> {
+pub async fn invalid(stream: TcpStream) -> io::Result<()> {
     let response = "HTTP/1.1 400 INVALID_REQUEST\r\nContent-Length: 0\r\n\r\n";
     finish_request(stream, response).await
 }
 
-pub async fn internal_server_error(stream: TcpStream) -> std::io::Result<()> {
+pub async fn internal_server_error(stream: TcpStream) -> io::Result<()> {
     let response = "HTTP/1.1 500 INTERNAL_SERVER_ERROR\r\nContent-Length: 0\r\n\r\n";
     finish_request(stream, response).await
 }
 
-async fn finish_request(stream: TcpStream, response: &str) -> std::io::Result<()> {
+async fn finish_request(stream: TcpStream, response: &str) -> io::Result<()> {
     let mut locked_stream = stream;
     locked_stream.write_all(response.as_bytes()).await?;
     locked_stream.flush().await?;
@@ -60,9 +60,8 @@ pub async fn close_ws_with_error(
     })
 }
 
-pub async fn serve_static(data: RequestData) -> Result<(), tokio::io::Error> {
+pub async fn serve_static(data: RequestData) -> Result<(), io::Error> {
     let file_path = format!(".{}", data.path);
-    println!("Serving static file: {}", file_path);
     if Path::new(&file_path).exists() {
         let mut file = File::open(&file_path).await?;
         let mut contents = Vec::new();
