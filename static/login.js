@@ -1,15 +1,20 @@
-document.getElementById('loginForm').addEventListener('submit', function(event) {
+if (sessionStorage.getItem('token') && sessionStorage.getItem('id')) {
+    window.location.href = '/';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
+    const errorMessage = document.getElementById('errorMessage');
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
     const payload = {
-        username: username,
-        password: password
+        name: username,
+        password: await hashSHA256(password)
     };
 
-    fetch('/api/login', {
+    fetch('/api/auth/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -23,12 +28,14 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
             return response.json();
         })
         .then(data => {
-            sessionStorage.setItem('token', data.token);
+            sessionStorage.setItem('id', data?.id);
+            sessionStorage.setItem('name', data?.name);
+            sessionStorage.setItem('token', data?.token);
             window.location.href = '/';
         })
         .catch(error => {
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.style.display = 'block';
+            errorMessage.style.opacity = '1';
+            errorMessage.innerHTML = error;
             console.error('Error:', error);
         });
 });

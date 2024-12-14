@@ -1,8 +1,8 @@
 use askama::Template;
-use tokio::io::AsyncWriteExt;
 use crate::entity::request_data::RequestData;
+use crate::entity::template::{IndexTemplate, RegisterTemplate, LoginTemplate};
 use crate::utils::http_helper;
-use crate::utils::http_helper::{is_route};
+use crate::utils::http_helper::{finish_request, is_route};
 
 pub const PREFIX: &str = "";
 
@@ -15,20 +15,8 @@ pub async fn frontend_controller(data: RequestData) -> tokio::io::Result<()> {
     }
 }
 
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    title: String,
-    heading: String,
-    content: String,
-}
-
 async fn get_index(data: RequestData) -> tokio::io::Result<()> {
-    let template = IndexTemplate {
-        title: "Hello world!".to_string(),
-        heading: "Hello world!".to_string(),
-        content: "ąężźć.".to_string(),
-    };
+    let template = IndexTemplate {};
 
     let response_body = template
         .render()
@@ -40,18 +28,8 @@ async fn get_index(data: RequestData) -> tokio::io::Result<()> {
         response_body
     );
 
-    let mut stream = data.stream;
-    stream
-        .write_all(response.as_bytes())
-        .await
-        .expect("Error occurred on sending response");
-    stream.flush().await.expect("Error occurred on flushing stream");
-    Ok(())
+    finish_request(data.stream, &*response).await
 }
-
-#[derive(Template)]
-#[template(path = "login.html")]
-struct LoginTemplate {}
 
 async fn get_login(data: RequestData) -> tokio::io::Result<()> {
     let template = LoginTemplate {};
@@ -66,18 +44,8 @@ async fn get_login(data: RequestData) -> tokio::io::Result<()> {
         response_body
     );
 
-    let mut stream = data.stream;
-    stream
-        .write_all(response.as_bytes())
-        .await
-        .expect("Error occurred on sending response");
-    stream.flush().await.expect("Error occurred on flushing stream");
-    Ok(())
+    finish_request(data.stream, &*response).await
 }
-
-#[derive(Template)]
-#[template(path = "register.html")]
-struct RegisterTemplate {}
 
 async fn get_register(data: RequestData) -> tokio::io::Result<()> {
     let template = RegisterTemplate {};
@@ -92,11 +60,5 @@ async fn get_register(data: RequestData) -> tokio::io::Result<()> {
         response_body
     );
 
-    let mut stream = data.stream;
-    stream
-        .write_all(response.as_bytes())
-        .await
-        .expect("Error occurred on sending response");
-    stream.flush().await.expect("Error occurred on flushing stream");
-    Ok(())
+    finish_request(data.stream, &*response).await
 }

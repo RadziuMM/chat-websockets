@@ -5,6 +5,7 @@ use tokio_tungstenite::WebSocketStream;
 use tokio::net::TcpStream;
 use tungstenite::protocol::CloseFrame;
 use futures_util::{SinkExt, StreamExt};
+use serde::Deserialize;
 use tokio::fs::File;
 use tokio::io;
 use crate::entity::request_data::RequestData;
@@ -19,12 +20,17 @@ pub async fn invalid(stream: TcpStream) -> io::Result<()> {
     finish_request(stream, response).await
 }
 
+pub async fn unauthenticated(stream: TcpStream) -> io::Result<()> {
+    let response = "HTTP/1.1 401 UNAUTHENTICATED\r\nContent-Length: 0\r\n\r\n";
+    finish_request(stream, response).await
+}
+
 pub async fn internal_server_error(stream: TcpStream) -> io::Result<()> {
     let response = "HTTP/1.1 500 INTERNAL_SERVER_ERROR\r\nContent-Length: 0\r\n\r\n";
     finish_request(stream, response).await
 }
 
-async fn finish_request(stream: TcpStream, response: &str) -> io::Result<()> {
+pub async fn finish_request(stream: TcpStream, response: &str) -> io::Result<()> {
     let mut locked_stream = stream;
     locked_stream.write_all(response.as_bytes()).await?;
     locked_stream.flush().await?;
@@ -99,4 +105,12 @@ fn get_content_type(file_path: &str) -> &str {
     } else {
         "application/octet-stream"
     }
+}
+
+pub fn parse_body<T: for<'de> Deserialize<'de>>(buffer: &[u8]) -> Result<T, String> {
+    let content = std::str::from_utf8(buffer).map_err(|_| "Invalid UTF-8 encoding".to_string())?;
+    let body_start = content.find("\r\n\r\n")
+        .ok_or_else(|| "Invalid HTTP format: Missing body".to_string())? + 4;
+    let body = content[body_start..].trim_end_matches('\0').trim();
+    serde_json::from_str(body).map_err(|err| format!("Failed to parse JSON: {}", err))
 }

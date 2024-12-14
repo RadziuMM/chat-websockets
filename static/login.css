@@ -58,16 +58,17 @@ body {
 .error-message {
     color: red;
     font-size: 14px;
-    display: none;
-    clear: both;
+    opacity: 0;
+    min-height: 16px;
+    min-width: 10px;
+    padding-bottom: 8px;
 }
 
 .form-link {
-    float: right;
     font-size: 14px;
     font-weight: bold;
     margin-top: -12px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .form-link a {

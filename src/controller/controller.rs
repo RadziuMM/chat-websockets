@@ -6,7 +6,7 @@ use crate::utils::http_helper;
 use crate::utils::http_helper::{close_ws_with_error, serve_static};
 use crate::utils::utils::extract_path_from_request;
 use crate::controller::frontend::{frontend_controller, PREFIX as FRONTEND_CONTROLLER_PREFIX};
-use crate::controller::register::{register_controller, PREFIX as REGISTER_CONTROLLER_PREFIX};
+use crate::controller::auth::{register_controller, PREFIX as REGISTER_CONTROLLER_PREFIX};
 
 pub async fn init(listener: TcpListener) -> std::io::Result<()> {
     loop {

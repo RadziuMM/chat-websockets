@@ -1,3 +1,3 @@
 mod frontend;
-mod register;
+mod auth;
 pub(crate) mod controller;

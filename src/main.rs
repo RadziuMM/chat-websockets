@@ -1,6 +1,7 @@
 mod controller;
 mod utils;
 mod entity;
+mod repository;
 
 use tokio::net::TcpListener;
 use crate::controller::controller::init;
