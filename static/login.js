@@ -1,4 +1,4 @@
-if (sessionStorage.getItem('token') && sessionStorage.getItem('id')) {
+if (getCookieValue('token') && getCookieValue('id')) {
     window.location.href = '/';
 }
 
@@ -28,9 +28,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             return response.json();
         })
         .then(data => {
-            sessionStorage.setItem('id', data?.id);
-            sessionStorage.setItem('name', data?.name);
-            sessionStorage.setItem('token', data?.token);
+            document.cookie = `id=${data.id}; path=/; SameSite=Strict;`;
+            document.cookie = `name=${data.name}; path=/; SameSite=Strict;`;
+            document.cookie = `token=${data.token}; path=/; SameSite=Strict;`;
             window.location.href = '/';
         })
         .catch(error => {

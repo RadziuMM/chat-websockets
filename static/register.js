@@ -1,4 +1,4 @@
-if (sessionStorage.getItem('token') && sessionStorage.getItem('id')) {
+if (getCookieValue('token') && getCookieValue('id')) {
     window.location.href = '/';
 }
 
@@ -33,8 +33,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             }
             return response.text();
         })
-        .then(data => {
-            console.log(data)
+        .then(_ => {
             errorMessage.style.opacity = '0';
             errorMessage.innerHTML = "";
 

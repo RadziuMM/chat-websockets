@@ -11,3 +11,12 @@ pub struct LoginTemplate {}
 #[derive(Template)]
 #[template(path = "register.html")]
 pub struct RegisterTemplate {}
+
+#[derive(Template)]
+#[template(path = "layout.html")]
+pub struct LayoutTemplate<T: Template> {
+    pub child: T,
+    pub subtitle: String,
+    pub js: String,
+    pub css: String,
+}

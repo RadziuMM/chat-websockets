@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio_tungstenite::tungstenite::protocol::Message;
@@ -113,4 +114,19 @@ pub fn parse_body<T: for<'de> Deserialize<'de>>(buffer: &[u8]) -> Result<T, Stri
         .ok_or_else(|| "Invalid HTTP format: Missing body".to_string())? + 4;
     let body = content[body_start..].trim_end_matches('\0').trim();
     serde_json::from_str(body).map_err(|err| format!("Failed to parse JSON: {}", err))
+}
+
+pub fn parse_cookies(headers: &str) -> HashMap<String, String> {
+    let mut cookies = HashMap::new();
+    if let Some(cookie_header) = headers.lines().find(|line| line.starts_with("Cookie:")) {
+        if let Some(cookie_str) = cookie_header.strip_prefix("Cookie: ") {
+            for cookie in cookie_str.split(';') {
+                let mut parts = cookie.splitn(2, '=');
+                if let (Some(key), Some(value)) = (parts.next(), parts.next()) {
+                    cookies.insert(key.trim().to_string(), value.trim().to_string());
+                }
+            }
+        }
+    }
+    cookies
 }
