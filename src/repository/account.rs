@@ -2,7 +2,6 @@ use serde::Serialize;
 use std::sync::{Mutex};
 use uuid::Uuid;
 use crate::entity::account::Account;
-use sha2::{Digest};
 use constant_time_eq::constant_time_eq;
 
 lazy_static::lazy_static! {

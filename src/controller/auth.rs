@@ -2,17 +2,19 @@ use crate::entity::account::{LoginDTO, MeDTO, RegisterDTO};
 use crate::entity::request_data::RequestData;
 use crate::entity::session::SessionTokenDTO;
 use crate::repository::account::{is_sha256_hash, insert_account, match_and_return_account, get_account_by_id};
-use crate::repository::session::{create_session, match_and_return_session};
+use crate::repository::session::{create_session, match_and_return_session, stop_session};
 use crate::utils::http_helper;
 use crate::utils::http_helper::{finish_request, invalid, is_route, parse_body, unauthenticated};
+use crate::utils::utils::{authorize, clear_cookies_response};
 
 pub const PREFIX: &str = "/api/auth";
 
-pub async fn register_controller(data: RequestData) -> tokio::io::Result<()> {
+pub async fn auth_controller(data: RequestData) -> tokio::io::Result<()> {
     match data {
         _ if is_route("POST", "/register", PREFIX, &data) => register(data).await,
         _ if is_route("POST", "/login", PREFIX, &data) => login(data).await,
         _ if is_route("POST", "/me", PREFIX, &data) => me(data).await,
+        _ if is_route("POST", "/logout", PREFIX, &data) => logout(data).await,
         _ => http_helper::not_found(data.stream).await
     }
 }
@@ -65,6 +67,33 @@ async fn login(data: RequestData) -> tokio::io::Result<()> {
         },
         None => unauthenticated(data.stream).await,
     }
+}
+
+async fn logout(data: RequestData) -> tokio::io::Result<()> {
+    let session = match authorize(&data.buffer) {
+        Ok(data) => data,
+        Err(_) => {
+            let response = format!("HTTP/1.1 302 Found\r\n\
+                Location: /login\r\n\
+                {}
+                \r\n",
+               clear_cookies_response()
+            );
+
+            return finish_request(data.stream, &response).await
+        },
+    };
+
+    stop_session(&session.id);
+
+    let response = format!("HTTP/1.1 302 Found\r\n\
+        Location: /login\r\n\
+        {}
+        \r\n",
+       clear_cookies_response()
+    );
+
+    finish_request(data.stream, &response).await
 }
 
 async fn me(data: RequestData) -> tokio::io::Result<()> {

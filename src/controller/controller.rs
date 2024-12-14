@@ -6,7 +6,8 @@ use crate::utils::http_helper;
 use crate::utils::http_helper::{close_ws_with_error, serve_static};
 use crate::utils::utils::extract_path_from_request;
 use crate::controller::frontend::{frontend_controller, PREFIX as FRONTEND_CONTROLLER_PREFIX};
-use crate::controller::auth::{register_controller, PREFIX as REGISTER_CONTROLLER_PREFIX};
+use crate::controller::auth::{auth_controller, PREFIX as REGISTER_CONTROLLER_PREFIX};
+use crate::controller::room::{room_controller, router_room_ws, PREFIX as ROOM_CONTROLLER_PREFIX};
 
 pub async fn init(listener: TcpListener) -> std::io::Result<()> {
     loop {
@@ -56,7 +57,8 @@ async fn route_request(mut stream: TcpStream) -> std::io::Result<()> {
 async fn routing(data: RequestData) -> Result<(), std::io::Error> {
     match &data.path {
         p if p.starts_with("/static/") => serve_static(data).await,
-        p if p.starts_with(REGISTER_CONTROLLER_PREFIX) => register_controller(data).await,
+        p if p.starts_with(REGISTER_CONTROLLER_PREFIX) => auth_controller(data).await,
+        p if p.starts_with(ROOM_CONTROLLER_PREFIX) => room_controller(data).await,
         p if p.starts_with(FRONTEND_CONTROLLER_PREFIX) => frontend_controller(data).await,
         _ => http_helper::not_found(data.stream).await
     }
@@ -64,7 +66,7 @@ async fn routing(data: RequestData) -> Result<(), std::io::Error> {
 
 async fn routing_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>) -> Result<(), std::io::Error> {
     match path {
-        // TODO: ws routing
+        p if p.starts_with(ROOM_CONTROLLER_PREFIX) => router_room_ws(path, ws_stream).await,
         _ => close_ws_with_error(ws_stream, 404, "Not Found".parse().unwrap()).await
     }
 }

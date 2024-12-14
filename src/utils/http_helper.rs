@@ -11,6 +11,11 @@ use tokio::fs::File;
 use tokio::io;
 use crate::entity::request_data::RequestData;
 
+pub async fn ok(stream: TcpStream) -> io::Result<()> {
+    let response = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
+    finish_request(stream, response).await
+}
+
 pub async fn not_found(stream: TcpStream) -> io::Result<()> {
     let response = "HTTP/1.1 404 NOT_FOUND\r\nContent-Length: 0\r\n\r\n";
     finish_request(stream, response).await
@@ -23,11 +28,6 @@ pub async fn invalid(stream: TcpStream) -> io::Result<()> {
 
 pub async fn unauthenticated(stream: TcpStream) -> io::Result<()> {
     let response = "HTTP/1.1 401 UNAUTHENTICATED\r\nContent-Length: 0\r\n\r\n";
-    finish_request(stream, response).await
-}
-
-pub async fn internal_server_error(stream: TcpStream) -> io::Result<()> {
-    let response = "HTTP/1.1 500 INTERNAL_SERVER_ERROR\r\nContent-Length: 0\r\n\r\n";
     finish_request(stream, response).await
 }
 
@@ -129,4 +129,25 @@ pub fn parse_cookies(headers: &str) -> HashMap<String, String> {
         }
     }
     cookies
+}
+
+pub fn is_ws_route(path: &str, prefix: &str, data_path: &str) -> bool {
+    let (request_path, _query) = data_path.split_once('?').unwrap_or((&data_path, ""));
+
+    let prefix_path = format!("{}{}", prefix, path);
+    let prefix_path_with_slash = format!("{}/", prefix_path);
+
+    request_path == prefix_path || request_path == &prefix_path_with_slash
+}
+
+pub fn get_query_params(query: &str) -> HashMap<String, String> {
+    query
+        .split('&')
+        .filter_map(|pair| {
+            let mut parts = pair.split('=');
+            let key = parts.next()?;
+            let value = parts.next()?;
+            Some((key.to_string(), value.to_string()))
+        })
+        .collect()
 }

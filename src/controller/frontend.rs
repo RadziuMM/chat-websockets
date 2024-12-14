@@ -3,8 +3,8 @@ use crate::entity::request_data::RequestData;
 use crate::entity::template::{IndexTemplate, RegisterTemplate, LoginTemplate, LayoutTemplate};
 use crate::repository::account::get_account_by_id;
 use crate::utils::http_helper;
-use crate::utils::http_helper::{finish_request, invalid, is_route, parse_cookies};
-use crate::utils::utils::authorize;
+use crate::utils::http_helper::{finish_request, is_route};
+use crate::utils::utils::{authorize, clear_cookies_response};
 
 pub const PREFIX: &str = "";
 
@@ -21,18 +21,18 @@ async fn get_index(data: RequestData) -> tokio::io::Result<()> {
     let session = match authorize(&data.buffer) {
         Ok(data) => data,
         Err(_) => {
-            let response = "HTTP/1.1 302 Found\r\n\
-                 Location: /login\r\n\
-                 Set-Cookie: id=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict\r\n\
-                 Set-Cookie: token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict\r\n\
-                 Set-Cookie: name=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict\r\n\
-                 \r\n".to_string();
+            let response = format!("HTTP/1.1 302 Found\r\n\
+                Location: /login\r\n\
+                {}
+                \r\n",
+                clear_cookies_response()
+            );
 
             return finish_request(data.stream, &response).await
         },
     };
 
-    let account = get_account_by_id(session.id);
+    let _ = get_account_by_id(session.id);
 
     let template = LayoutTemplate {
         child: IndexTemplate {},
