@@ -66,7 +66,7 @@ async fn receive_message(mut ws_stream: WebSocketStream<&mut TcpStream>, path: &
 
     let room_id = params.get("id").cloned().unwrap_or_default();
     let room = {
-        let rooms = ROOMS.lock().await;
+        let rooms = ROOMS.lock().unwrap();
         rooms.get(&room_id).cloned().ok_or_else(|| {
             tokio::io::Error::new(tokio::io::ErrorKind::NotFound, "Room not found")
         })?

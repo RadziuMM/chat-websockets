@@ -90,7 +90,7 @@ async fn logout(data: RequestData) -> tokio::io::Result<()> {
         Location: /login\r\n\
         {}
         \r\n",
-       clear_cookies_response()
+        clear_cookies_response()
     );
 
     finish_request(data.stream, &response).await
