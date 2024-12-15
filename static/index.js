@@ -4,10 +4,6 @@ function enterChat(chatId) {
     window.location.href = `/room?id=${chatId}`;
 }
 
-function deleteChat(chatId) {
-    alert("Deleting chat: " + chatId);
-}
-
 const loadChatRooms = () => fetch('/api/room', {
     method: 'GET',
     headers: {
@@ -56,6 +52,7 @@ function closePopup() {
 
 const socket = new WebSocket(`ws://localhost:3000/api/room/send`)
 const socketGet = new WebSocket(`ws://localhost:3000/api/room/get`)
+const socketDelete = new WebSocket(`ws://localhost:3000/api/room/delete`)
 
 socket.addEventListener("open", () => {
     console.log("Connected to the WebSocket server.");
@@ -63,10 +60,17 @@ socket.addEventListener("open", () => {
 socketGet.addEventListener("open", () => {
     console.log("Connected to the WebSocket server.");
 });
+socketDelete.addEventListener("open", () => {
+    console.log("Connected to the WebSocket server.");
+});
+
 socket.addEventListener("error", (error) => {
     console.error("WebSocket error:", error);
 });
 socketGet.addEventListener("error", (error) => {
+    console.error("WebSocket error:", error);
+});
+socketDelete.addEventListener("error", (error) => {
     console.error("WebSocket error:", error);
 });
 
@@ -76,8 +80,14 @@ socket.addEventListener("close", () => {
 socketGet.addEventListener("close", () => {
     console.log("WebSocket connection closed.");
 });
+socketDelete.addEventListener("close", () => {
+    console.log("WebSocket connection closed.");
+});
 
 socketGet.addEventListener("message", (event) => {
+    loadChatRooms().catch(error => console.error(error));
+});
+socketDelete.addEventListener("message", (event) => {
     loadChatRooms().catch(error => console.error(error));
 });
 
@@ -90,5 +100,8 @@ function submitChat() {
     socket.send(roomName);
     document.getElementById("room-name").value = "";
     closePopup();
-    loadChatRooms().catch(error => console.error(error));
+}
+
+function deleteChat(chatId) {
+    socketDelete.send(chatId);
 }

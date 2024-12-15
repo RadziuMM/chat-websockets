@@ -1,5 +1,4 @@
 main {
-    min-height: calc(100vh - 140px);
     display: flex;
     flex-direction: column;
 }
@@ -13,6 +12,7 @@ main {
     border-bottom: 1px solid #ccc;
     background-color: white;
     max-height: calc(100vh - 300px);
+    min-height: calc(100vh - 300px);
     scrollbar-width: thin;
 }
 

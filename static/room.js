@@ -50,8 +50,8 @@ fetch(`/api/room/${roomId}`, {
     console.error('Error:', error);
 });
 
-const socket = new WebSocket(`ws://localhost:3000/api/room/message/send?id=${roomId}`)
-const socketGet = new WebSocket(`ws://localhost:3000/api/room/message/get?id=${roomId}`)
+const socket = new WebSocket(`ws://localhost:3000/api/message/send?id=${roomId}`)
+const socketGet = new WebSocket(`ws://localhost:3000/api/message/get?id=${roomId}`)
 
 socket.addEventListener("open", () => {
     console.log("Connected to the WebSocket server.");

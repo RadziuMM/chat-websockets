@@ -8,6 +8,7 @@ use crate::utils::http_helper::{close_ws_with_error, serve_static};
 use crate::utils::utils::extract_path_from_request;
 use crate::controller::frontend::{frontend_controller, PREFIX as FRONTEND_CONTROLLER_PREFIX};
 use crate::controller::auth::{auth_controller, PREFIX as AUTH_CONTROLLER_PREFIX};
+use crate::controller::message::{router_message_ws, PREFIX as MESSAGE_CONTROLLER_PREFIX};
 use crate::controller::room::{room_controller, router_room_ws, PREFIX as ROOM_CONTROLLER_PREFIX};
 
 pub async fn init(listener: TcpListener) -> std::io::Result<()> {
@@ -69,6 +70,7 @@ async fn routing(data: RequestData) -> Result<(), std::io::Error> {
 async fn routing_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>, buffer: [u8; 1024]) -> Result<(), std::io::Error> {
     match path {
         p if p.starts_with(ROOM_CONTROLLER_PREFIX) => router_room_ws(path, ws_stream, buffer).await,
+        p if p.starts_with(MESSAGE_CONTROLLER_PREFIX) => router_message_ws(path, ws_stream, buffer).await,
         _ => close_ws_with_error(ws_stream, 404, "Not Found".parse().unwrap()).await
     }
 }

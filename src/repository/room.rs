@@ -26,6 +26,18 @@ pub async fn create(name: String)  {
     rooms.insert(room.clone().id, room);
 }
 
+pub async fn delete(id: String) {
+    let mut rooms = ROOMS.lock().await;
+    let room = rooms.get(&id).cloned();
+    if let Some(room) = room {
+        if let Err(err) = ROOM_SENDER.send(room.clone()) {
+            eprintln!("Failed to broadcast room: {}", err);
+        }
+    }
+
+    rooms.remove(&id);
+}
+
 pub async fn get() -> Vec<Room> {
     let rooms = ROOMS.lock().await;
     rooms.values().cloned().collect()
