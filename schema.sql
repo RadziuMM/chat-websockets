@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS messages (
     username TEXT NOT NULL,
     content TEXT NOT NULL,
     date TEXT NOT NULL,
-    FOREIGN KEY (room_id) REFERENCES rooms(id)
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
 );
