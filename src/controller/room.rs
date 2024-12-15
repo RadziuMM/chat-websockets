@@ -18,11 +18,11 @@ pub async fn room_controller(mut data: RequestData) -> tokio::io::Result<()> {
     }
 }
 
-pub async fn router_room_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>, buffer: [u8; 1024]) -> std::io::Result<()> {
+pub async fn router_room_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>) -> std::io::Result<()> {
     match path {
-        _ if is_ws_route("/get", PREFIX, path) => receive_room(ws_stream, path, buffer).await,
-        _ if is_ws_route("/send", PREFIX, path) => send_room(ws_stream, path, buffer).await,
-        _ if is_ws_route("/delete", PREFIX, path) => delete_room(ws_stream, path, buffer).await,
+        _ if is_ws_route("/get", PREFIX, path) => receive_room(ws_stream).await,
+        _ if is_ws_route("/send", PREFIX, path) => send_room(ws_stream).await,
+        _ if is_ws_route("/delete", PREFIX, path) => delete_room(ws_stream).await,
         _ => Err(tokio::io::Error::new(tokio::io::ErrorKind::NotFound, "Route not found")),
     }
 }
@@ -66,7 +66,7 @@ async fn get_room(data: RequestData) -> tokio::io::Result<()> {
     not_found(data.stream).await
 }
 
-async fn send_room(ws_stream: WebSocketStream<&mut TcpStream>, path: &str, buffer: [u8; 1024]) -> tokio::io::Result<()> {
+async fn send_room(ws_stream: WebSocketStream<&mut TcpStream>) -> tokio::io::Result<()> {
     let (_, mut receiver) = ws_stream.split();
 
     while let Some(Ok(msg)) = receiver.next().await {
@@ -83,7 +83,7 @@ async fn send_room(ws_stream: WebSocketStream<&mut TcpStream>, path: &str, buffe
     Ok(())
 }
 
-async fn delete_room(ws_stream: WebSocketStream<&mut TcpStream>, path: &str, buffer: [u8; 1024]) -> tokio::io::Result<()> {
+async fn delete_room(ws_stream: WebSocketStream<&mut TcpStream>) -> tokio::io::Result<()> {
     let (_, mut receiver) = ws_stream.split();
 
     while let Some(Ok(msg)) = receiver.next().await {
@@ -100,7 +100,7 @@ async fn delete_room(ws_stream: WebSocketStream<&mut TcpStream>, path: &str, buf
     Ok(())
 }
 
-async fn receive_room(mut ws_stream: WebSocketStream<&mut TcpStream>, path: &str, buffer: [u8; 1024]) -> tokio::io::Result<()> {
+async fn receive_room(mut ws_stream: WebSocketStream<&mut TcpStream>) -> tokio::io::Result<()> {
     let mut broadcast_receiver = ROOM_SENDER.subscribe();
     while let Ok(_) = broadcast_receiver.recv().await {
         if ws_stream

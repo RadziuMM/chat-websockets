@@ -11,7 +11,7 @@ pub const PREFIX: &str = "/api/message";
 pub async fn router_message_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>, buffer: [u8; 1024]) -> std::io::Result<()> {
     match path {
         _ if is_ws_route("/send", PREFIX, path) => send_message(ws_stream, path, buffer).await,
-        _ if is_ws_route("/get", PREFIX, path) => receive_message(ws_stream, path, buffer).await,
+        _ if is_ws_route("/get", PREFIX, path) => receive_message(ws_stream, path).await,
         _ => Err(tokio::io::Error::new(tokio::io::ErrorKind::NotFound, "Route not found")),
     }
 }
@@ -60,7 +60,7 @@ async fn send_message(ws_stream: WebSocketStream<&mut TcpStream>, path: &str, bu
     Ok(())
 }
 
-async fn receive_message(mut ws_stream: WebSocketStream<&mut TcpStream>, path: &str, buffer: [u8; 1024]) -> tokio::io::Result<()> {
+async fn receive_message(mut ws_stream: WebSocketStream<&mut TcpStream>, path: &str) -> tokio::io::Result<()> {
     let (_, query) = path.split_once('?').unwrap_or((&path, ""));
     let params = get_query_params(query);
 

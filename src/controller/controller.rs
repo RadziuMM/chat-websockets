@@ -69,7 +69,7 @@ async fn routing(data: RequestData) -> Result<(), std::io::Error> {
 
 async fn routing_ws(path: &str, ws_stream: WebSocketStream<&mut TcpStream>, buffer: [u8; 1024]) -> Result<(), std::io::Error> {
     match path {
-        p if p.starts_with(ROOM_CONTROLLER_PREFIX) => router_room_ws(path, ws_stream, buffer).await,
+        p if p.starts_with(ROOM_CONTROLLER_PREFIX) => router_room_ws(path, ws_stream).await,
         p if p.starts_with(MESSAGE_CONTROLLER_PREFIX) => router_message_ws(path, ws_stream, buffer).await,
         _ => close_ws_with_error(ws_stream, 404, "Not Found".parse().unwrap()).await
     }

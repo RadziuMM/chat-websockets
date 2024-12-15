@@ -8,7 +8,7 @@ use rusqlite::{Connection};
 use tokio::io;
 use tokio::net::TcpListener;
 use crate::controller::controller::init;
-use crate::repository::{account, room, session};
+use crate::repository::{account, room};
 
 #[tokio::main]
 async fn main() {
