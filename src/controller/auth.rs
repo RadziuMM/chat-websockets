@@ -9,12 +9,12 @@ use crate::utils::utils::{authorize, clear_cookies_response};
 
 pub const PREFIX: &str = "/api/auth";
 
-pub async fn auth_controller(data: RequestData) -> tokio::io::Result<()> {
+pub async fn auth_controller(mut data: RequestData) -> tokio::io::Result<()> {
     match data {
-        _ if is_route("POST", "/register", PREFIX, &data) => register(data).await,
-        _ if is_route("POST", "/login", PREFIX, &data) => login(data).await,
-        _ if is_route("POST", "/me", PREFIX, &data) => me(data).await,
-        _ if is_route("POST", "/logout", PREFIX, &data) => logout(data).await,
+        _ if is_route("POST", "/register", PREFIX, &mut data) => register(data).await,
+        _ if is_route("POST", "/login", PREFIX, &mut data) => login(data).await,
+        _ if is_route("POST", "/me", PREFIX, &mut data) => me(data).await,
+        _ if is_route("POST", "/logout", PREFIX, &mut data) => logout(data).await,
         _ => http_helper::not_found(data.stream).await
     }
 }

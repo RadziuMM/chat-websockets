@@ -39,14 +39,63 @@ pub async fn finish_request(stream: TcpStream, response: &str) -> io::Result<()>
     Ok(())
 }
 
-pub fn is_route(method: &str, path: &str, prefix: &str, data: &RequestData) -> bool {
+pub fn is_route(method: &str, path: &str, prefix: &str, data: &mut RequestData) -> bool {
     let (request_path, _query) = data.path.split_once('?').unwrap_or((&data.path, ""));
 
-    let prefix_path = format!("{}{}", prefix, path);
-    let prefix_path_with_slash = format!("{}/", prefix_path);
+    if path.is_empty() {
+        return (request_path == prefix || request_path == format!("{}/", prefix))
+            && data.method == method;
+    }
 
-    (request_path == prefix_path || request_path == &prefix_path_with_slash)
-        && data.method == method
+    let full_path = if prefix.ends_with('/') || path.starts_with('/') {
+        format!("{}{}", prefix, path)
+    } else {
+        format!("{}/{}", prefix, path)
+    };
+
+    let expected_segments: Vec<&str> = full_path.split('/').collect();
+    let request_segments: Vec<&str> = request_path.split('/').collect();
+
+    if data.method != method {
+        return false;
+    }
+
+    if expected_segments.len() != request_segments.len() {
+        return false;
+    }
+
+    let normalized_expected = expected_segments
+        .iter()
+        .map(|&segment| if segment.starts_with(':') { "" } else { segment })
+        .collect::<Vec<_>>()
+        .join("/");
+
+
+    let normalized_request = request_segments
+        .iter()
+        .zip(expected_segments.iter())
+        .map(|(&req_segment, &expected_segment)| {
+            if expected_segment.starts_with(':') {
+                ""
+            } else {
+                req_segment
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("/");
+
+    data.params.clear();
+    for (expected_segment, request_segment) in expected_segments.iter().zip(request_segments.iter())
+    {
+        if expected_segment.starts_with(':') {
+            let key = expected_segment.trim_start_matches(':').to_string();
+            data.params.insert(key, request_segment.to_string());
+        } else if expected_segment != request_segment {
+            return false;
+        }
+    }
+
+    normalized_request == normalized_expected
 }
 
 pub async fn close_ws_with_error(

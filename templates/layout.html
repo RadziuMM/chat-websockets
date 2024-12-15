@@ -5,12 +5,13 @@
         <title>Chat{{ subtitle }}</title>
         <link rel="stylesheet" href="/static/{{ css }}">
         <link rel="stylesheet" href="/static/layout.css">
+        <script src="/static/helper.js"></script>
         <script src="/static/layout.js"></script>
     </head>
     <body>
         <header>
             <div class="header-wrapper">
-                <div class="logo">Chat</div>
+                <a href="/" class="logo">Chat</a>
                 <div class="nav">
                     <button onclick="logout()">Logout</button>
                 </div>
@@ -19,7 +20,6 @@
         <main>
             {{ child|safe }}
         </main>
-        <script src="/static/helper.js" defer></script>
         <script src="/static/{{ js }}" defer></script>
     </body>
 </html>

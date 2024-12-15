@@ -5,6 +5,10 @@ use askama::Template;
 pub struct IndexTemplate {}
 
 #[derive(Template)]
+#[template(path = "room.html")]
+pub struct RoomTemplate {}
+
+#[derive(Template)]
 #[template(path = "login.html")]
 pub struct LoginTemplate {}
 

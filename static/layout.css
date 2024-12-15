@@ -23,6 +23,8 @@ header .header-wrapper {
 .header-wrapper .logo {
     font-size: 1.5em;
     font-weight: bold;
+    text-decoration: none;
+    color: black;
 }
 
 .header-wrapper .nav {

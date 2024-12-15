@@ -172,6 +172,7 @@ dependencies = [
  "constant_time_eq",
  "futures-util",
  "lazy_static",
+ "once_cell",
  "serde",
  "serde_json",
  "serde_urlencoded",

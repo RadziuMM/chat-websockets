@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use tokio::net::TcpStream;
 
 pub struct RequestData {
@@ -5,4 +6,5 @@ pub struct RequestData {
     pub(crate) buffer: [u8; 1024],
     pub(crate) method: String,
     pub(crate) path: String,
+    pub(crate) params: HashMap<String, String>,
 }
