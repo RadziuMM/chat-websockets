@@ -1,5 +1,5 @@
 # ChatterSpace
-#### Video Demo:  https://www.youtube.com/watch?v=aYNuidiCF6w
+
 ## Description
 
 The ChatterSpace is a lightweight, real-time communication system built using **Rust**, leveraging **WebSocket** technology for instant message delivery and **SQLite** for persistent data storage. The application provides a robust, room-based chat system where users can create, join, and interact within unique chat rooms. Each room supports message broadcasting to all participants, ensuring seamless communication.
